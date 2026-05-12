@@ -5,6 +5,12 @@ const nextCtx = nextCanvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const startMenu = document.getElementById('start-menu');
 const btnStart = document.getElementById('btn-start');
+const usernameInput = document.getElementById('username-input');
+const leaderboardList = document.getElementById('leaderboard-list');
+
+const API_URL = 'http://localhost:3000/api';
+let userId = null;
+let username = '';
 
 const ROW = 20;
 const COL = 10;
@@ -40,6 +46,55 @@ let nextPiece = null;
 let gameLoop = null;
 let isGameRunning = false;
 
+// --- API Functions ---
+async function fetchLeaderboard() {
+    try {
+        const response = await fetch(`${API_URL}/leaderboard`);
+        const data = await response.json();
+        leaderboardList.innerHTML = '';
+        if (data.length === 0) {
+            leaderboardList.innerHTML = '<li>아직 기록이 없습니다.</li>';
+            return;
+        }
+        data.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${index + 1}. ${entry.username}</span> <strong>${entry.top_score}</strong>`;
+            leaderboardList.appendChild(li);
+        });
+    } catch (err) {
+        leaderboardList.innerHTML = '<li>순위를 불러오지 못했습니다.</li>';
+    }
+}
+
+async function registerUser() {
+    username = usernameInput.value.trim() || 'Anonymous';
+    try {
+        const response = await fetch(`${API_URL}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        const data = await response.json();
+        userId = data.userId;
+    } catch (err) {
+        console.error('Registration failed', err);
+    }
+}
+
+async function submitScore() {
+    if (!userId) return;
+    try {
+        await fetch(`${API_URL}/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, score })
+        });
+    } catch (err) {
+        console.error('Score submission failed', err);
+    }
+}
+
+// --- Game Logic ---
 function resize() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
@@ -201,14 +256,21 @@ function drop() {
     drawBoard();
 }
 
-function gameOver() {
+async function gameOver() {
     isGameRunning = false;
     if (gameLoop) clearInterval(gameLoop);
-    alert('게임 오버! 점수: ' + score);
+    
+    // 점수 제출
+    await submitScore();
+    
+    alert('게임 오버! ' + username + '님의 점수: ' + score);
     
     board = Array.from({ length: ROW }, () => Array(COL).fill(0));
     score = 0;
     scoreElement.innerText = score;
+    
+    // 리더보드 갱신 및 메뉴 표시
+    await fetchLeaderboard();
     startMenu.classList.remove('hidden');
 }
 
@@ -234,7 +296,8 @@ addBtnListener('btn-down', drop);
 addBtnListener('btn-rotate', rotate);
 addBtnListener('btn-drop', hardDrop);
 
-btnStart.addEventListener('click', () => {
+btnStart.addEventListener('click', async () => {
+    await registerUser();
     startMenu.classList.add('hidden');
     start();
 });
@@ -262,4 +325,6 @@ function start() {
     drawBoard();
 }
 
+// 초기화 시 리더보드 로드
 resize();
+fetchLeaderboard();
