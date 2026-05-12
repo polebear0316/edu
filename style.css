@@ -79,22 +79,45 @@ h3 {
 }
 
 .controls {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, auto);
     gap: 8px;
     width: 100%;
+    margin-top: 10px;
     user-select: none;
     -webkit-user-select: none;
 }
 
-.control-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+#btn-rotate {
+    grid-column: 2;
+    grid-row: 1;
+    background-color: #2980b9; /* 회전은 다른 색상으로 강조 */
+}
+
+#btn-left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+#btn-down {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+#btn-right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+#btn-drop {
+    grid-column: 1 / 4;
+    grid-row: 3;
+    margin-top: 5px;
 }
 
 .btn {
-    padding: 12px 0;
+    padding: 15px 0;
     font-size: 0.9rem;
     font-family: inherit;
     cursor: pointer;
@@ -102,12 +125,12 @@ h3 {
     color: white;
     border: none;
     border-radius: 8px;
-    flex: 1;
     touch-action: manipulation;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: background-color 0.1s, transform 0.05s;
+    min-height: 50px;
 }
 
 .btn:active {
