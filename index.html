@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심플 무지개 테트리스</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="main-layout">
+            <div class="board-container">
+                <canvas id="game-board" width="300" height="600"></canvas>
+            </div>
+            <div class="side-panel">
+                <div class="next-block-container">
+                    <h3>NEXT</h3>
+                    <canvas id="next-block" width="120" height="120"></canvas>
+                </div>
+                <div class="score-container">
+                    <h3>SCORE</h3>
+                    <div id="score">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="control-row">
+                <button id="btn-rotate" class="btn">회전 (Rotate)</button>
+                <button id="btn-drop" class="btn btn-primary">확정 (Drop)</button>
+            </div>
+            <div class="control-row">
+                <button id="btn-left" class="btn">좌 (Left)</button>
+                <button id="btn-down" class="btn">하 (Down)</button>
+                <button id="btn-right" class="btn">우 (Right)</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
