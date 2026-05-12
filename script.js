@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-block');
 const nextCtx = nextCanvas.getContext('2d');
 const scoreElement = document.getElementById('score');
+const startMenu = document.getElementById('start-menu');
+const btnStart = document.getElementById('btn-start');
 
 const ROW = 20;
 const COL = 10;
@@ -36,21 +38,20 @@ let score = 0;
 let currentPiece = null;
 let nextPiece = null;
 let gameLoop = null;
+let isGameRunning = false;
 
 function resize() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     
-    // 계산 로직: 화면 높이의 약 70% 정도를 게임판이 차지하게 함
-    // 또는 너비의 일정 비율 중 작은 값을 선택
     const maxWidth = windowWidth * 0.9;
     const maxHeight = windowHeight * 0.6;
     
-    const sizeByWidth = Math.floor(maxWidth / (COL + 5)); // 사이드 패널 포함 고려
+    const sizeByWidth = Math.floor(maxWidth / (COL + 5));
     const sizeByHeight = Math.floor(maxHeight / ROW);
     
-    BLOCK_SIZE = Math.min(sizeByWidth, sizeByHeight, 30); // 최대 30px
-    if (BLOCK_SIZE < 15) BLOCK_SIZE = 15; // 최소 크기 보장
+    BLOCK_SIZE = Math.min(sizeByWidth, sizeByHeight, 30);
+    if (BLOCK_SIZE < 15) BLOCK_SIZE = 15;
     
     NEXT_BLOCK_SIZE = Math.floor(BLOCK_SIZE * 0.8);
     
@@ -89,7 +90,6 @@ function drawBlock(ctx, x, y, colorIndex, size) {
 function drawBoard() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // 보드 그리기
     for (let r = 0; r < ROW; r++) {
         for (let c = 0; c < COL; c++) {
             if (board[r][c]) {
@@ -97,7 +97,6 @@ function drawBoard() {
             }
         }
     }
-    // 현재 블록 그리기
     if (currentPiece) {
         currentPiece.shape.forEach((row, r) => {
             row.forEach((value, c) => {
@@ -160,7 +159,7 @@ function clearLines() {
             board.splice(r, 1);
             board.unshift(Array(COL).fill(0));
             linesCleared++;
-            r++; // 다시 검사
+            r++;
         }
     }
     if (linesCleared > 0) {
@@ -186,6 +185,7 @@ function move(dir) {
 }
 
 function drop() {
+    if (!isGameRunning) return;
     if (!collide(currentPiece, 0, 1)) {
         currentPiece.y++;
     } else {
@@ -195,28 +195,36 @@ function drop() {
         nextPiece = createPiece();
         drawNextPiece();
         if (collide(currentPiece, 0, 0)) {
-            alert('게임 오버! 점수: ' + score);
-            board = Array.from({ length: ROW }, () => Array(COL).fill(0));
-            score = 0;
-            scoreElement.innerText = score;
+            gameOver();
         }
     }
     drawBoard();
 }
 
+function gameOver() {
+    isGameRunning = false;
+    if (gameLoop) clearInterval(gameLoop);
+    alert('게임 오버! 점수: ' + score);
+    
+    board = Array.from({ length: ROW }, () => Array(COL).fill(0));
+    score = 0;
+    scoreElement.innerText = score;
+    startMenu.classList.remove('hidden');
+}
+
 function hardDrop() {
+    if (!isGameRunning) return;
     while (!collide(currentPiece, 0, 1)) {
         currentPiece.y++;
     }
     drop();
 }
 
-// 이벤트 리스너 - Touch/Click 통합 대응
 const addBtnListener = (id, action) => {
     const btn = document.getElementById(id);
     btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        action();
+        if (isGameRunning) action();
     });
 };
 
@@ -226,21 +234,26 @@ addBtnListener('btn-down', drop);
 addBtnListener('btn-rotate', rotate);
 addBtnListener('btn-drop', hardDrop);
 
-// 키보드 지원
+btnStart.addEventListener('click', () => {
+    startMenu.classList.add('hidden');
+    start();
+});
+
 document.addEventListener('keydown', (e) => {
+    if (!isGameRunning) return;
     if (e.key === 'ArrowLeft') move(-1);
     if (e.key === 'ArrowRight') move(1);
     if (e.key === 'ArrowDown') drop();
     if (e.key === 'ArrowUp') rotate();
     if (e.key === ' ') {
-        e.preventDefault(); // Space scrolling 방지
+        e.preventDefault();
         hardDrop();
     }
 });
 
-// 초기화
 function start() {
     resize();
+    isGameRunning = true;
     currentPiece = createPiece();
     nextPiece = createPiece();
     drawNextPiece();
@@ -249,4 +262,4 @@ function start() {
     drawBoard();
 }
 
-start();
+resize();

@@ -8,6 +8,23 @@
 </head>
 <body>
     <div class="game-container">
+        <!-- 시작 메뉴 오버레이 -->
+        <div id="start-menu" class="overlay">
+            <div class="menu-content">
+                <h1>심플 무지개 테트리스</h1>
+                <div class="instructions">
+                    <p><strong>[조작 방법]</strong></p>
+                    <ul>
+                        <li><strong>← / →</strong> : 좌우 이동</li>
+                        <li><strong>↑ / Rotate</strong> : 블록 회전</li>
+                        <li><strong>↓ / Down</strong> : 한 칸 아래로</li>
+                        <li><strong>Space / Drop</strong> : 즉시 하강</li>
+                    </ul>
+                </div>
+                <button id="btn-start" class="btn btn-primary btn-large">게임 시작 (Start)</button>
+            </div>
+        </div>
+
         <div class="main-layout">
             <div class="board-container">
                 <canvas id="game-board" width="300" height="600"></canvas>
